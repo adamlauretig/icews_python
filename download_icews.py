@@ -7,4 +7,5 @@ urls_to_download = ['https://dataverse.harvard.edu/api/access/datafile/:persiste
 r = requests.get(urls_to_download[0])
 z = zipfile.ZipFile(io.BytesIO(r.content))
 df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
-df.head()
+list(df.columns)
+df['CAMEO Code']
