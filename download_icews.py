@@ -2,6 +2,7 @@ import urllib.request
 import requests, zipfile, io
 import pandas as pd
 
+# event codes ----
 CAMEO_codefile = "CAMEO_codefile.txt"  # translates event text to CAMEO event codes
 CAMEO_eventcodes = {}
 fin = open(CAMEO_codefile,'r') 
@@ -15,6 +16,18 @@ while len(line) > 0:
         caseno += 1
     #	if caseno > 32: break   # debugging exit 		
     line = fin.readline()
+
+# agents/sectors ----
+agentnames = "agentnames.txt"
+sectornames = {}
+fin = open(agentnames,'r') 
+line = fin.readline()
+while len(line) > 0:
+    part = line.split("\t")
+    sectornames[part[0]] = part[1]
+    line = fin.readline()
+
+
 
 
 
