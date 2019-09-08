@@ -1,7 +1,7 @@
 import urllib.request
 import requests, zipfile, io
 import pandas as pd
-
+import numpy as np
 # event codes ----
 CAMEO_codefile = "CAMEO_codefile.txt"  # translates event text to CAMEO event codes
 CAMEO_eventcodes = {}
@@ -54,6 +54,22 @@ df['Source Sectors'].head()
 df['Source Country'].head()
 df['CAMEO Code'].head()
 df['Intensity'].head()
-cols_to_use = ['Event Date', 'Source Sectors', 'Source Country', 'Target Sectors', 'Target Country', 'Event Text']
+df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
+df['Source Sector Code'] = df['Source Sectors'].map(sectornames)
+df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
+df['Source Country Code'] = df['Source Country'].map(countrycodes)
+df['Target Country Code'] = df['Target Country'].map(countrycodes)
+cols_to_use = ['Event Date', 'Event Text', 'Event Code', 'Source Sector Code', 'Target Sector Code', 'Source Country Code', 'Target Country Code']
 df2 = df[cols_to_use]
-df2['Event Text'].map(CAMEO_eventcodes)
+df2['Event Short'] = df2['Event Code'].str[:2]
+df2['Event Short'] = df2['Event Short'].astype('int')
+df2['Quad Count'] = np.select(
+    [
+        df2['Event Short'].between(0, 5, inclusive = True),
+        df2['Event Short'].between(6, 8, inclusive = True),
+        df2['Event Short'].between(9, 13, inclusive = True),
+        df2['Event Short'].between(14, 20, inclusive = True),
+    ],
+    ['Verbal Cooperation', 'Material Cooperation', 'Verbal Conflict', 'Material Conflict'], 
+    default = 0
+)
