@@ -27,9 +27,20 @@ while len(line) > 0:
     sectornames[part[0]] = part[1]
     line = fin.readline()
 
+# countrynames ----
+countrynames = "countrynames.txt"
+countrycodes = {}
+fin = open(countrynames, 'r')
+line = fin.readline()
+COW = False
+while len(line) > 0:
+    part = line.split("\t")
+    if COW == False:
+        countrycodes[ part[0] ] = part[1]
+    else:
+        countrycodes[ part[0] ] = part[2][:-1]
 
-
-
+    line = fin.readline()
 
 
 urls_to_download = ['https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/28075/WNOBVV']
@@ -37,4 +48,12 @@ r = requests.get(urls_to_download[0])
 z = zipfile.ZipFile(io.BytesIO(r.content))
 df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
 list(df.columns)
-df['CAMEO Code']
+df['Event Date']
+df['Source Name'].head()
+df['Source Sectors'].head()
+df['Source Country'].head()
+df['CAMEO Code'].head()
+df['Intensity'].head()
+cols_to_use = ['Event Date', 'Source Sectors', 'Source Country', 'Target Sectors', 'Target Country', 'Event Text']
+df2 = df[cols_to_use]
+df2['Event Text'].map(CAMEO_eventcodes)
