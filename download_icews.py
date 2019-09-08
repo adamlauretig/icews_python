@@ -73,3 +73,9 @@ df2['Quad Count'] = np.select(
     ['Verbal Cooperation', 'Material Cooperation', 'Verbal Conflict', 'Material Conflict'], 
     default = 0
 )
+
+df3 = df2.drop_duplicates()
+df2_dim = df2.shape
+
+df3_dim = df3.shape
+df4 = df3.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Quad Count']).size()
