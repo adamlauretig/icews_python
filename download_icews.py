@@ -42,40 +42,43 @@ while len(line) > 0:
 
     line = fin.readline()
 
+# urls ----
+icews_urls = 'icews_files.txt'
+urls = {}
+fin = open(icews_urls, 'r')
+line = fin.readline()
+while len(line) > 0:
+    part = line.split("\t")
+    urls[ part[0]] = part[1]
+    line = fin.readline()
 
-urls_to_download = ['https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/28075/WNOBVV']
-r = requests.get(urls_to_download[0])
+r = requests.get(urls['1995'])
 z = zipfile.ZipFile(io.BytesIO(r.content))
 df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
-list(df.columns)
-df['Event Date']
-df['Source Name'].head()
-df['Source Sectors'].head()
-df['Source Country'].head()
-df['CAMEO Code'].head()
-df['Intensity'].head()
+# list(df.columns)
+# df['Event Date']
+# df['Source Name'].head()
+# df['Source Sectors'].head()
+# df['Source Country'].head()
+# df['CAMEO Code'].head()
+# df['Intensity'].head()
 df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
 df['Source Sector Code'] = df['Source Sectors'].map(sectornames)
 df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
 df['Source Country Code'] = df['Source Country'].map(countrycodes)
 df['Target Country Code'] = df['Target Country'].map(countrycodes)
-cols_to_use = ['Event Date', 'Event Text', 'Event Code', 'Source Sector Code', 'Target Sector Code', 'Source Country Code', 'Target Country Code']
-df2 = df[cols_to_use]
-df2['Event Short'] = df2['Event Code'].str[:2]
-df2['Event Short'] = df2['Event Short'].astype('int')
-df2['Quad Count'] = np.select(
-    [
-        df2['Event Short'].between(0, 5, inclusive = True),
-        df2['Event Short'].between(6, 8, inclusive = True),
-        df2['Event Short'].between(9, 13, inclusive = True),
-        df2['Event Short'].between(14, 20, inclusive = True),
-    ],
+df['Event Short'] = df['Event Code'].str[:2]
+df['Event Short'] = df['Event Short'].astype('int')
+df['Quad Count'] = np.select([
+    df['Event Short'].between(0, 5, inclusive = True),
+    df['Event Short'].between(6, 8, inclusive = True),
+    df['Event Short'].between(9, 13, inclusive = True),
+    df['Event Short'].between(14, 20, inclusive = True),],
     ['Verbal Cooperation', 'Material Cooperation', 'Verbal Conflict', 'Material Conflict'], 
     default = 0
 )
-
-df3 = df2.drop_duplicates()
+cols_to_use = ['Event Date', 'Event Text', 'Event Code', 'Source Sector Code', 
+'Target Sector Code', 'Source Country Code', 'Target Country Code', 'Quad Count']
+df2 = df[cols_to_use].drop_duplicates()
 df2_dim = df2.shape
-
-df3_dim = df3.shape
-df4 = df3.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Quad Count']).size()
+df3 = df2.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Quad Count']).size()
