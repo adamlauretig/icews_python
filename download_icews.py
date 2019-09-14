@@ -16,6 +16,7 @@ while len(line) > 0:
         caseno += 1
     #	if caseno > 32: break   # debugging exit 		
     line = fin.readline()
+fin.close()
 
 # agents/sectors ----
 agentnames = "agentnames.txt"
@@ -26,6 +27,16 @@ while len(line) > 0:
     part = line.split("\t")
     sectornames[part[0]] = part[1]
     line = fin.readline()
+fin.close()
+agent_codes = ['GOV','MIL','REB','OPP', 'PTY', 'COP',
+'JUD','SPY','IGO','MED','EDU','BUS','CRM','CVL','---']
+
+def reduce_sectors(agent_vector):
+#   print agentlist
+    for code in agent_codes:
+        if code in agent_vector:
+            return code
+    return 'OTH'
 
 # countrynames ----
 countrynames = "countrynames.txt"
@@ -41,6 +52,7 @@ while len(line) > 0:
         countrycodes[ part[0] ] = part[2][:-1]
 
     line = fin.readline()
+fin.close()
 
 # urls ----
 icews_urls = 'icews_files.txt'
@@ -51,16 +63,21 @@ while len(line) > 0:
     part = line.split("\t")
     urls[ part[0]] = part[1]
     line = fin.readline()
+fin.close()
 
 
-def download_icews(year, deduplicate = True):
-    r = requests.get(urls['1995'])
+def download_icews(year, deduplicate = True, keep_sectors = False):
+    r = requests.get(urls[year])
     z = zipfile.ZipFile(io.BytesIO(r.content))
     df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
     # list(df.columns)
     df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
+    # todo: figure out sectors
+    # probably, the thing to do is split into a list, replace as needed, and then, recombine
     df['Source Sector Code'] = df['Source Sectors'].map(sectornames)
+    df['Source Sector Code'] = reduce_sectors(df['Source Sector Code'])
     df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
+    df['Target Sector Code'] = reduce_sectors(df['Target Sectors'])
     df['Source Country Code'] = df['Source Country'].map(countrycodes)
     df['Target Country Code'] = df['Target Country'].map(countrycodes)
     df['Event Short'] = df['Event Code'].str[:2]
@@ -77,7 +94,14 @@ def download_icews(year, deduplicate = True):
     'Target Sector Code', 'Source Country Code', 'Target Country Code', 'Quad Count']
     if deduplicate == True:
         df2 = df[cols_to_use].drop_duplicates()
+        
     else:
         df2 = df[cols_to_use]
-    df3 = df2.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Quad Count']).size()
+
+    if keep_sectors != True:
+        df3 = df2.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Quad Count']).size()
+    else:
+        df3 = df2.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Source Sector Code', 
+        'Target Sector Code','Quad Count']).size()
+       
     return df3
