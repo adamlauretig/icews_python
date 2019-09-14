@@ -52,33 +52,32 @@ while len(line) > 0:
     urls[ part[0]] = part[1]
     line = fin.readline()
 
-r = requests.get(urls['1995'])
-z = zipfile.ZipFile(io.BytesIO(r.content))
-df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
-# list(df.columns)
-# df['Event Date']
-# df['Source Name'].head()
-# df['Source Sectors'].head()
-# df['Source Country'].head()
-# df['CAMEO Code'].head()
-# df['Intensity'].head()
-df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
-df['Source Sector Code'] = df['Source Sectors'].map(sectornames)
-df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
-df['Source Country Code'] = df['Source Country'].map(countrycodes)
-df['Target Country Code'] = df['Target Country'].map(countrycodes)
-df['Event Short'] = df['Event Code'].str[:2]
-df['Event Short'] = df['Event Short'].astype('int')
-df['Quad Count'] = np.select([
-    df['Event Short'].between(0, 5, inclusive = True),
-    df['Event Short'].between(6, 8, inclusive = True),
-    df['Event Short'].between(9, 13, inclusive = True),
-    df['Event Short'].between(14, 20, inclusive = True),],
-    ['Verbal Cooperation', 'Material Cooperation', 'Verbal Conflict', 'Material Conflict'], 
-    default = 0
-)
-cols_to_use = ['Event Date', 'Event Text', 'Event Code', 'Source Sector Code', 
-'Target Sector Code', 'Source Country Code', 'Target Country Code', 'Quad Count']
-df2 = df[cols_to_use].drop_duplicates()
-df2_dim = df2.shape
-df3 = df2.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Quad Count']).size()
+
+def download_icews(year, deduplicate = True):
+    r = requests.get(urls['1995'])
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
+    # list(df.columns)
+    df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
+    df['Source Sector Code'] = df['Source Sectors'].map(sectornames)
+    df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
+    df['Source Country Code'] = df['Source Country'].map(countrycodes)
+    df['Target Country Code'] = df['Target Country'].map(countrycodes)
+    df['Event Short'] = df['Event Code'].str[:2]
+    df['Event Short'] = df['Event Short'].astype('int')
+    df['Quad Count'] = np.select([
+        df['Event Short'].between(0, 5, inclusive = True),
+        df['Event Short'].between(6, 8, inclusive = True),
+        df['Event Short'].between(9, 13, inclusive = True),
+        df['Event Short'].between(14, 20, inclusive = True),],
+        ['Verbal Cooperation', 'Material Cooperation', 'Verbal Conflict', 'Material Conflict'], 
+        default = 0
+    )
+    cols_to_use = ['Event Date', 'Event Text', 'Event Code', 'Source Sector Code', 
+    'Target Sector Code', 'Source Country Code', 'Target Country Code', 'Quad Count']
+    if deduplicate == True:
+        df2 = df[cols_to_use].drop_duplicates()
+    else:
+        df2 = df[cols_to_use]
+    df3 = df2.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Quad Count']).size()
+    return df3
