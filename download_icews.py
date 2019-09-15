@@ -30,14 +30,9 @@ while len(line) > 0:
 fin.close()
 agent_codes = ['GOV','MIL','REB','OPP', 'PTY', 'COP',
 'JUD','SPY','IGO','MED','EDU','BUS','CRM','CVL','---']
-
-def reduce_sectors(agent_vector):
-#   print agentlist
-    for code in agent_codes:
-        if code in agent_vector:
-            return code
-    return 'OTH'
-
+# using a dict comprehension here
+sectornames = {k:(v if v in agent_codes else 'OTH') for k,v in sectornames.items()}
+sectornames['nan']  = 'OTH'
 # countrynames ----
 countrynames = "countrynames.txt"
 countrycodes = {}
@@ -74,10 +69,12 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
     # todo: figure out sectors
     # probably, the thing to do is split into a list, replace as needed, and then, recombine
-    df['Source Sector Code'] = df['Source Sectors'].map(sectornames)
-    df['Source Sector Code'] = reduce_sectors(df['Source Sector Code'])
+    df['Source Sector Code'] = df['Source Sectors'].str.split(',')
+    # [[dictionary.get(item, item) for item in lst] for lst in word_list]
+    df['Source Sector Code'] = [ [sectornames.get(item, item) for item in [lst]] for lst in df['Source Sector Code']]
+    # df['Source Sector Code'] = reduce_sectors(df['Source Sector Code'])
     df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
-    df['Target Sector Code'] = reduce_sectors(df['Target Sectors'])
+    # df['Target Sector Code'] = reduce_sectors(df['Target Sectors'])
     df['Source Country Code'] = df['Source Country'].map(countrycodes)
     df['Target Country Code'] = df['Target Country'].map(countrycodes)
     df['Event Short'] = df['Event Code'].str[:2]
