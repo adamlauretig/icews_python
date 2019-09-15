@@ -69,9 +69,12 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
     # todo: figure out sectors
     # probably, the thing to do is split into a list, replace as needed, and then, recombine
-    df['Source Sector Code'] = df['Source Sectors'].str.split(',')
+    if type(df['Source Sector Code']) != list:
+        print
+    # df['Source Sector Code'] = df['Source Sectors'].str.split(',')
+
     # [[dictionary.get(item, item) for item in lst] for lst in word_list]
-    df['Source Sector Code'] = [ [sectornames.get(item, item) for item in [lst]] for lst in df['Source Sector Code']]
+    df['Source Sector Code'] = [ [sectornames.get(item, item) for item in lst] for lst in df['Source Sectors'].str.split(',') if isinstance(lst, list)]
     # df['Source Sector Code'] = reduce_sectors(df['Source Sector Code'])
     df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
     # df['Target Sector Code'] = reduce_sectors(df['Target Sectors'])
