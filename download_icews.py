@@ -67,16 +67,19 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
     # list(df.columns)
     df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
-    # todo: figure out sectors
-    # probably, the thing to do is split into a list, replace as needed, and then, recombine
-    if type(df['Source Sector Code']) != list:
-        print
-    # df['Source Sector Code'] = df['Source Sectors'].str.split(',')
 
     # [[dictionary.get(item, item) for item in lst] for lst in word_list]
-    df['Source Sector Code'] = [ [sectornames.get(item, item) for item in lst] for lst in df['Source Sectors'].str.split(',') if isinstance(lst, list)]
+    # dfCombined.loc[dfCombined[col].isnull(), 'col']
+    df.loc[df['Source Sectors'].notnull(),'Source Sector Code'] = [[
+        sectornames.get(item, item) for item in lst] for lst in df.loc[df[
+            'Source Sectors'].notnull(), 'Source Sectors'].str.split(',') ]
+    # df['Source Sectors', ]
     # df['Source Sector Code'] = reduce_sectors(df['Source Sector Code'])
-    df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
+    # df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
+    df.loc[df['Target Sectors'].notnull(),'Target Sector Code'] = [[
+        sectornames.get(item, item) for item in lst] for lst in df.loc[df[
+            'Target Sectors'].notnull(), 'Target Sectors'].str.split(',') ]
+
     # df['Target Sector Code'] = reduce_sectors(df['Target Sectors'])
     df['Source Country Code'] = df['Source Country'].map(countrycodes)
     df['Target Country Code'] = df['Target Country'].map(countrycodes)
