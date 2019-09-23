@@ -73,16 +73,31 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     df.loc[df['Source Sectors'].notnull(),'Source Sector Code'] = [[
         sectornames.get(item, item) for item in lst] for lst in df.loc[df[
             'Source Sectors'].notnull(), 'Source Sectors'].str.split(',') ]
-    # df['Source Sectors', ]
-    # df['Source Sector Code'] = reduce_sectors(df['Source Sector Code'])
-    # df['Target Sector Code'] = df['Target Sectors'].map(sectornames)
+    df.loc[df['Source Sector Code'].notnull(),'Source Sector Code'] = [
+        ','.join(lst) for lst in df.loc[df['Source Sector Code'].notnull(), 
+        'Source Sector Code']]
+
+
     df.loc[df['Target Sectors'].notnull(),'Target Sector Code'] = [[
         sectornames.get(item, item) for item in lst] for lst in df.loc[df[
             'Target Sectors'].notnull(), 'Target Sectors'].str.split(',') ]
+    df.loc[df['Target Sector Code'].notnull(),'Target Sector Code'] = [
+        ','.join(lst) for lst in df.loc[df['Target Sector Code'].notnull(), 
+        'Target Sector Code']]
 
+    df.loc[df['Source Country'].notnull(),'Source Country Code'] = [[
+        countrycodes.get(item, item) for item in lst] for lst in df.loc[df[
+            'Source Country'].notnull(), 'Source Country'].str.split(',') ]
+    df.loc[df['Source Country Code'].notnull(),'Source Country Code'] = [
+        ','.join(lst) for lst in df.loc[df['Source Country Code'].notnull(), 
+        'Source Country Code']]            
+    df.loc[df['Target Country'].notnull(),'Target Country Code'] = [[
+        countrycodes.get(item, item) for item in lst] for lst in df.loc[df[
+            'Target Country'].notnull(), 'Target Country'].str.split(',') ]
+    df.loc[df['Target Country Code'].notnull(),'Target Country Code'] = [
+        ','.join(lst) for lst in df.loc[df['Target Country Code'].notnull(), 
+        'Target Country Code']]  
     # df['Target Sector Code'] = reduce_sectors(df['Target Sectors'])
-    df['Source Country Code'] = df['Source Country'].map(countrycodes)
-    df['Target Country Code'] = df['Target Country'].map(countrycodes)
     df['Event Short'] = df['Event Code'].str[:2]
     df['Event Short'] = df['Event Short'].astype('int')
     df['Quad Count'] = np.select([
