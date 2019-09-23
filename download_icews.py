@@ -3,6 +3,8 @@ import requests, zipfile, io
 import pandas as pd
 import numpy as np
 # event codes ----
+
+# agent cleaning code taken/modified from Phil Schrodt (https://github.com/openeventdata/text_to_CAMEO)
 CAMEO_codefile = "CAMEO_codefile.txt"  # translates event text to CAMEO event codes
 CAMEO_eventcodes = {}
 fin = open(CAMEO_codefile,'r') 
@@ -84,7 +86,6 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     df.loc[df['Target Sector Code'].notnull(),'Target Sector Code'] = [
         ','.join(lst) for lst in df.loc[df['Target Sector Code'].notnull(), 
         'Target Sector Code']]
-
     df.loc[df['Source Country'].notnull(),'Source Country Code'] = [[
         countrycodes.get(item, item) for item in lst] for lst in df.loc[df[
             'Source Country'].notnull(), 'Source Country'].str.split(',') ]
@@ -123,3 +124,6 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
         'Target Sector Code','Quad Count']).size()
        
     return df3
+
+
+df_1995 = download_icews('1995')
