@@ -47,7 +47,6 @@ while len(line) > 0:
         countrycodes[ part[0] ] = part[1]
     else:
         countrycodes[ part[0] ] = part[2][:-1]
-
     line = fin.readline()
 fin.close()
 
@@ -64,14 +63,17 @@ fin.close()
 
 
 def download_icews(year, deduplicate = True, keep_sectors = False):
+    """ A function to download and clean ICEWS data files from Harvard's Dataverse
+    Arguments:
+        year: a string matching a year in 'icews_urls'
+        deduplicate: a Boolean. should events be de-duplicated by day?
+        keep_sectors: a Boolean. Should the final dataframe include sector variables? """
+        
     r = requests.get(urls[year])
     z = zipfile.ZipFile(io.BytesIO(r.content))
     df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
     # list(df.columns)
     df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
-
-    # [[dictionary.get(item, item) for item in lst] for lst in word_list]
-    # dfCombined.loc[dfCombined[col].isnull(), 'col']
     df.loc[df['Source Sectors'].notnull(),'Source Sector Code'] = [[
         sectornames.get(item, item) for item in lst] for lst in df.loc[df[
             'Source Sectors'].notnull(), 'Source Sectors'].str.split(',') ]
@@ -98,7 +100,6 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     df.loc[df['Target Country Code'].notnull(),'Target Country Code'] = [
         ','.join(lst) for lst in df.loc[df['Target Country Code'].notnull(), 
         'Target Country Code']]  
-    # df['Target Sector Code'] = reduce_sectors(df['Target Sectors'])
     df['Event Short'] = df['Event Code'].str[:2]
     df['Event Short'] = df['Event Short'].astype('int')
     df['Quad Count'] = np.select([
