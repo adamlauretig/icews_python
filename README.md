@@ -6,4 +6,6 @@ Here is some experimental python3 code to download raw ICEWS files, clean them i
 
 Code is still experimental, and might be buggy. It needs a lot of commenting right now. You should probably spot check any results.
 
-There's a blogpost coming, at some point.
+There's a blog post coming, at some point.
+
+`/text_to_CAMEO-master` contains the original code from Phil Schrodt.
