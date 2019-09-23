@@ -127,3 +127,4 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
 
 
 df_1995 = download_icews('1995')
+df_1996 = download_icews('1996')
