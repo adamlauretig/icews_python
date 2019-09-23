@@ -67,8 +67,7 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     Arguments:
         year: a string matching a year in 'icews_urls'
         deduplicate: a Boolean. should events be de-duplicated by day?
-        keep_sectors: a Boolean. Should the final dataframe include sector variables? """
-        
+        keep_sectors: a Boolean. Should the final dataframe include sector variables? """ 
     r = requests.get(urls[year])
     z = zipfile.ZipFile(io.BytesIO(r.content))
     df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
