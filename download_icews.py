@@ -106,11 +106,13 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
         df['Event Short'].between(6, 8, inclusive = True),
         df['Event Short'].between(9, 13, inclusive = True),
         df['Event Short'].between(14, 20, inclusive = True),],
-        ['Verbal Cooperation', 'Material Cooperation', 'Verbal Conflict', 'Material Conflict'], 
+        ['Verbal Cooperation', 'Material Cooperation', 
+        'Verbal Conflict', 'Material Conflict'], 
         default = 0
     )
-    cols_to_use = ['Event Date', 'Event Text', 'Event Code', 'Source Sector Code', 
-    'Target Sector Code', 'Source Country Code', 'Target Country Code', 'Quad Count']
+    cols_to_use = ['Event Date', 'Event Text', 'Event Code', 
+    'Source Sector Code', 'Target Sector Code', 'Source Country Code', 
+    'Target Country Code', 'Quad Count']
     if deduplicate == True:
         df2 = df[cols_to_use].drop_duplicates()
         
@@ -118,9 +120,11 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
         df2 = df[cols_to_use]
 
     if keep_sectors != True:
-        df3 = df2.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Quad Count']).size()
+        df3 = df2.groupby(['Event Date', 'Source Country Code', 
+        'Target Country Code', 'Quad Count']).size()
     else:
-        df3 = df2.groupby(['Event Date', 'Source Country Code', 'Target Country Code', 'Source Sector Code', 
+        df3 = df2.groupby(['Event Date', 'Source Country Code', 
+        'Target Country Code', 'Source Sector Code', 
         'Target Sector Code','Quad Count']).size()
        
     return df3
