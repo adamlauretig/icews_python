@@ -2,6 +2,7 @@ import urllib.request
 import requests, zipfile, io
 import pandas as pd
 import numpy as np
+import pickle
 # event codes ----
 
 # agent cleaning code taken/modified from Phil Schrodt (https://github.com/openeventdata/text_to_CAMEO)
@@ -14,7 +15,7 @@ while len(line) > 0:
     if line.startswith('LABEL'):
         part = line[line.find(' ')+1:].partition(' ') # split text on space, w/ text after "LABEL: "
         CAMEO_eventcodes[part[2][:-1]] = part[0][:-1] # assign to dict
-        print(CAMEO_eventcodes[part[2][:-1]])
+        # print(CAMEO_eventcodes[part[2][:-1]])
         caseno += 1
     #	if caseno > 32: break   # debugging exit 		
     line = fin.readline()
@@ -33,7 +34,8 @@ fin.close()
 agent_codes = ['GOV','MIL','REB','OPP', 'PTY', 'COP',
 'JUD','SPY','IGO','MED','EDU','BUS','CRM','CVL','---']
 # using a dict comprehension here
-sectornames = {k:(v if v in agent_codes else 'OTH') for k,v in sectornames.items()}
+sectornames = {k:(
+    v if v in agent_codes else 'OTH') for k,v in sectornames.items()}
 sectornames['nan']  = 'OTH'
 # countrynames ----
 countrynames = "countrynames.txt"
@@ -79,8 +81,6 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     df.loc[df['Source Sector Code'].notnull(),'Source Sector Code'] = [
         ','.join(lst) for lst in df.loc[df['Source Sector Code'].notnull(), 
         'Source Sector Code']]
-
-
     df.loc[df['Target Sectors'].notnull(),'Target Sector Code'] = [[
         sectornames.get(item, item) for item in lst] for lst in df.loc[df[
             'Target Sectors'].notnull(), 'Target Sectors'].str.split(',') ]
@@ -130,5 +130,18 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
     return df3
 
 
-df_1995 = download_icews('1995')
-df_1996 = download_icews('1996')
+# df_1995 = download_icews('1995')
+# df_1996 = download_icews('1996')
+
+# A loop through all the urls to create a dictionary of ICEWS events,
+# and then, converting this dictionary to a dataframe
+icews_sets = {}
+dates = list(urls.keys())
+for i in dates:
+    print(i + "\n")
+    icews_sets[i] = download_icews(i)
+
+icews_df = pd.DataFrame.from_dict(icews_sets)
+file_to_use = open("icews_df.obj", 'wb')
+pickle.dump(icews_df, file_to_use)
+file_to_use.close()
