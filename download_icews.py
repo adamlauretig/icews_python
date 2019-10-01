@@ -63,7 +63,7 @@ while len(line) > 0:
     line = fin.readline()
 fin.close()
 
-
+# todo: handle the file change, 2014-2018 -> from .tab.zip to .tab
 def download_icews(year, deduplicate = True, keep_sectors = False):
     """ A function to download and clean ICEWS data files from Harvard's Dataverse
     Arguments:
@@ -132,14 +132,24 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
 
 # df_1995 = download_icews('1995')
 # df_1996 = download_icews('1996')
-
+# df_2006 = download_icews('2006')
 # A loop through all the urls to create a dictionary of ICEWS events,
 # and then, converting this dictionary to a dataframe
 icews_sets = {}
 dates = list(urls.keys())
-for i in dates:
+for i in dates[0:11]:
     print(i + "\n")
     icews_sets[i] = download_icews(i)
+
+for i in dates[11:17]:
+    print(i + "\n")
+    icews_sets[i] = download_icews(i)
+
+for i in dates[17:25]:
+    print(i + "\n")
+    icews_sets[i] = download_icews(i)
+
+
 
 icews_df = pd.DataFrame.from_dict(icews_sets)
 file_to_use = open("icews_df.obj", 'wb')
