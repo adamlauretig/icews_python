@@ -3,6 +3,7 @@ import requests, zipfile, io
 import pandas as pd
 import numpy as np
 import pickle
+import csv
 # event codes ----
 
 # agent cleaning code taken/modified from Phil Schrodt (https://github.com/openeventdata/text_to_CAMEO)
@@ -71,8 +72,13 @@ def download_icews(year, deduplicate = True, keep_sectors = False):
         deduplicate: a Boolean. should events be de-duplicated by day?
         keep_sectors: a Boolean. Should the final dataframe include sector variables? """ 
     r = requests.get(urls[year])
-    z = zipfile.ZipFile(io.BytesIO(r.content))
-    df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
+    if year in ['2014', '2015', '2016', '2017', '2018']:
+        z = r.content
+        # reader = csv.reader(z, delimiter="\t")
+        df = pd.read_csv(io.StringIO(z.decode('utf-8')), sep = "\t")
+    else:
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        df = pd.read_csv(z.open(zipfile.ZipFile.namelist(z)[0]), sep = "\t")
     # list(df.columns)
     df['Event Code'] = df['Event Text'].map(CAMEO_eventcodes)
     df.loc[df['Source Sectors'].notnull(),'Source Sector Code'] = [[
