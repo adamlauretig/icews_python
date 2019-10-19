@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import tensorly as tl
-from tensorly.decomposition import tucker, parafac, non_negative_tucker
+from tensorly.decomposition import tucker, parafac, non_negative_tucker, matrix_product_state
 
 tensor = np.random.random((10, 10, 10))
 # mode-1 unfolding (i.e. zeroth mode)
@@ -22,7 +22,7 @@ dyad_event_counts_melt = dyad_event_counts.melt(
     value_vars = list(dyad_event_counts)[3:28], 
     var_name = 'year', value_name = 'event_count')
 dyad_event_counts_melt_group = dyad_event_counts_melt.groupby(
-    ['Source Country Code', 'Target Country Code', 'Quad Count', 'year']
+    ['Source Country Code', 'Target Country Code', 'year', 'Quad Count']
     )['event_count'].mean()
 shape = tuple(map(len, dyad_event_counts_melt_group.index.levels))
 events_array = np.full(shape, np.nan)
